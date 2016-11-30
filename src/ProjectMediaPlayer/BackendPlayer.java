@@ -8,11 +8,10 @@ import javax.media.*;
 public class BackendPlayer {
 	Player p;
 	
-	
 	public BackendPlayer(String filepath) {		
 		try {
 			p = Manager.createPlayer(new File(filepath).toURI().toURL());
-			System.out.println(filepath);
+			//System.out.println(filepath);
 		} catch (NoPlayerException e) {
 			System.out.println("Exception "+e);
 		} catch (MalformedURLException e) {
@@ -34,8 +33,7 @@ public class BackendPlayer {
 	
 	public void muteVolume()
 	{
-		System.out.println("setting value false");
-			setVolume((float)0.0001);		
+		setVolume((float)0.0001);		
 	}
 
 	public void finalize()
@@ -44,7 +42,7 @@ public class BackendPlayer {
 	}
 
 	public void setVolume(float d) {
-		System.out.println("setting value "+d);
+		//System.out.println("setting value "+d);
 		Audio.setMasterOutputVolume(d);
 		
 	}

@@ -1,24 +1,29 @@
 package ProjectMediaPlayer;
 
 import javax.swing.*;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+
 import java.awt.event.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
-public class Application implements ActionListener , MouseListener {
+public class Application implements ActionListener , MouseListener ,ChangeListener{
 	
     JFrame frame;
     JPanel panel;
-    JButton playButton,pauseButton,nextButton,previousButton,stopButton;
+    JButton playButton,pauseButton,stopButton;
     JSlider volume;
     JLabel songName;
     JMenuBar menubar;
     JMenu file,playback,help;
-    JMenuItem openfile,quit,play,pause,next,previous,stop,mute,about;
+    JMenuItem openfile,quit,play,pause,stop,mute,about;
     JCheckBox muteCheckbox;
     JLabel muteLabel,volumeup,volumedown;
     String filepath;
-    BackendPlayer runningPlayer;
     Boolean volumeEnable=true;
+    float previousVolumeValue=(float)0.5;
+    
+    BackendPlayer runningPlayer;
     
 	Application(){
 		setupGUI();	        
@@ -65,21 +70,11 @@ public class Application implements ActionListener , MouseListener {
         }
         else if(e.getSource().equals(mute))
         {
-        	System.out.println("actionclicked");
-        	if(volumeEnable.equals(true)){
-				volumeEnable=false;
-				muteCheckbox.setSelected(true);
-				mute.setVisible(false);
-				runningPlayer.muteVolume();
-				
-			}
-			else{
-				volumeEnable=true;
-				muteCheckbox.setSelected(false);
-				mute.setVisible(true);
-				runningPlayer.setVolume((float)0.5);
-			}
-        	
+        	onMute();        	
+        }
+        else if(e.getSource().equals(about))
+        {
+        	JOptionPane.showMessageDialog(null, "Atul Sharma\n-atulsharma@gmail.com\n\nGaurav Sikka\n-gauravsikka@gmail.com");
         }
     }
 	
@@ -115,21 +110,7 @@ public class Application implements ActionListener , MouseListener {
 		}
 		else if(e.getSource().equals(muteCheckbox))
 		{
-			System.out.println("mouseclicked");
-			if(volumeEnable.equals(true)){
-				volumeEnable=false;
-				muteCheckbox.setSelected(true);
-				mute.setVisible(false);
-				runningPlayer.muteVolume();
-				
-			}
-			else{
-				volumeEnable=true;
-				muteCheckbox.setSelected(false);
-				mute.setVisible(true);
-				runningPlayer.setVolume((float)0.5);
-			}
-			
+			onMute();			
 		}
 		
 	}
@@ -150,12 +131,14 @@ public class Application implements ActionListener , MouseListener {
 	public void mouseReleased(MouseEvent arg0) {		
 	}
 	
-	
-	
-	
+	@Override
+	public void stateChanged(ChangeEvent arg0) {
+		float currentVal = (float)volume.getValue();
+		runningPlayer.setVolume(currentVal/100);
+	}
 	
 	public void setupGUI(){
-		frame = new JFrame("GAG MediaPlayer");               
+		frame = new JFrame("MediaPlayer");               
 		//this line quits the program on clicking x button
 	    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);    
 	    panel = new JPanel();
@@ -167,23 +150,20 @@ public class Application implements ActionListener , MouseListener {
 	    quit = new JMenuItem("Quit");
 	    play = new JMenuItem("Play");
 	    pause = new JMenuItem("Pause");
-	    next = new JMenuItem("Next");
-	    previous = new JMenuItem("Previous");
 	    stop = new JMenuItem("Stop");
 	    mute = new JMenuItem("Mute");
 	    about = new JMenuItem("About");
-	    
 	    songName = new JLabel("");
 	    playButton = new JButton(new ImageIcon("icons/playicon.png"));
 	    
 		pauseButton = new JButton(new ImageIcon("icons/pauseicon.png"));
-		nextButton = new JButton(new ImageIcon("icons/nexticon.png"));
-		previousButton = new JButton(new ImageIcon("icons/previousicon.png"));
 		stopButton = new JButton(new ImageIcon("icons/stopicon.png"));
 		muteCheckbox = new JCheckBox("",false);
 		muteLabel = new JLabel(new ImageIcon("icons/muteicon.png"));
 		volumedown = new JLabel(new ImageIcon("icons/volumedownicon.png"));
 		volume = new JSlider();
+		volume.setMinimum(0);
+		volume.setMaximum(100);
 		volumeup = new JLabel(new ImageIcon("icons/volumeupicon.png"));
 		
 		playButton.addMouseListener(this);
@@ -196,6 +176,8 @@ public class Application implements ActionListener , MouseListener {
         stop.addActionListener(this);
         mute.addActionListener(this);
         muteCheckbox.addMouseListener(this);
+        volume.addChangeListener(this);
+        about.addActionListener(this);
 		
 		panel.setLayout(null);
 	    
@@ -208,16 +190,12 @@ public class Application implements ActionListener , MouseListener {
 		file.add(quit);
 		playback.add(play);
 		playback.add(pause);
-		playback.add(next);
-		playback.add(previous);
 		playback.add(stop);
 		playback.add(mute);
 		help.add(about);
-		panel.add(songName);
-		panel.add(previousButton);		
+		panel.add(songName);		
 		panel.add(playButton);
 		panel.add(pauseButton);
-		panel.add(nextButton);
 		panel.add(stopButton);
 		panel.add(muteCheckbox);
 		panel.add(muteLabel);
@@ -225,21 +203,19 @@ public class Application implements ActionListener , MouseListener {
 		panel.add(volume);
 		panel.add(volumeup);
 		
-		previousButton.setBounds(25,115,45,40);
-		playButton.setBounds(75,115,45,40);
-		pauseButton.setBounds(75,115,45,40);
-		nextButton.setBounds(125,115,45,40);
-		stopButton.setBounds(175,115,45,40);
-		muteCheckbox.setBounds(325,113,20,40);
-		muteLabel.setBounds(342,113,40,40);
-		volumedown.setBounds(400,113,40,40);
-		volume.setBounds(433,113,100,40);
-		volumeup.setBounds(530,113,40,40);
+		playButton.setBounds(50,80,45,40);
+		pauseButton.setBounds(50,80,45,40);
+		stopButton.setBounds(120,80,45,40);
+		muteCheckbox.setBounds(210,78,20,40);
+		muteLabel.setBounds(230,78,40,40);
+		volumedown.setBounds(300,78,40,40);
+		volume.setBounds(330,78,100,40);
+		volumeup.setBounds(430,78,40,40);
 		
 		frame.setVisible(true);
 		pauseButton.setVisible(false);
 		pause.setVisible(false);
-		frame.setSize(600,220);
+		frame.setSize(500,220);
 	}
 	
 	public String openTheFile()
@@ -251,7 +227,6 @@ public class Application implements ActionListener , MouseListener {
         String path=fileChooser.getSelectedFile().getAbsolutePath();
         return path;
     }
-	
 	
 	 public void onPlay()
      {
@@ -298,8 +273,24 @@ public class Application implements ActionListener , MouseListener {
     		 play.setVisible(true);
     	 }
      }
-
-	
-
+     
+	public void onMute()
+     {
+    	 if(volumeEnable.equals(true)){
+				volumeEnable=false;
+				muteCheckbox.setSelected(true);
+				mute.setVisible(false);
+				previousVolumeValue=volume.getValue();
+				runningPlayer.muteVolume();
+				volume.disable();
+			}
+			else{
+				volumeEnable=true;
+				muteCheckbox.setSelected(false);
+				mute.setVisible(true);
+				runningPlayer.setVolume((float)previousVolumeValue/100);
+				volume.enable();
+			}
+     }
 }
 
